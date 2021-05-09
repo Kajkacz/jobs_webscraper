@@ -97,7 +97,7 @@ class Analyser():
                      },
                      "avg_pay": {
                          "$avg": {
-                             "$toInt": "$salary.upper_range_pln"
+                             "$toInt": "$salary.average_pln"
                          }
                      },
                      "max_pay": {
