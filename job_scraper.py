@@ -1,7 +1,6 @@
 import pymongo
 import configparser
 
-from analyser import Analyser
 from scraper import Scraper
 from rates_converter import RatesConverter
 
@@ -23,9 +22,9 @@ driver = webdriver.Chrome(
 
 # Connect to mongodb client
 myclient = pymongo.MongoClient(
-    f"mongodb://{config['mongodb']['username']}:{config['mongodb']['password']}@{config['mongodb']['url']}/")  #
-mydb = myclient["dev_job_scrapper"]
-offers_collection = mydb["offers"]
+    f"mongodb+srv://{config['mongodb']['username']}:{config['mongodb']['password']}@{config['mongodb']['url']}/{config['mongodb']['db_name']}?retryWrites=true&w=majority")  #
+mydb = myclient[config['mongodb']['db_name']]
+offers_collection = mydb[config['mongodb']['collection_name']]
 
 # Run Scraper to get new offers
 scr = Scraper()
@@ -37,11 +36,3 @@ print("Finished Scrapping")
 rates = RatesConverter(offers_collection.distinct(
     "salary.currency"), config['rates']['api_key'])
 scr.convert_currencies(rates, offers_collection)
-
-# Run analysis for our data
-anal = Analyser(offers_collection)
-city_data = anal.get_average_pay_by_city()
-top_offers = anal.get_top_n_offers(city_filter="Warszawa")
-# for off in top_offers:
-#     print(off['link'])
-anal.plot_cities(city_data)

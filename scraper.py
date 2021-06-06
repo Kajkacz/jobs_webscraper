@@ -2,6 +2,7 @@ import re
 import tqdm
 import pymongo
 import feedparser
+from bs4 import BeautifulSoup
 
 from typing import Dict
 from selenium import webdriver
@@ -158,7 +159,7 @@ class Scraper():
         descr_text = descr_rest.split("Apply")
         descr_garbage = descr_text[-1]
         descr_text = "Apply".join(descr_text[:-2])
-        skill_list = [{skill.replace('.', ''): level} for (skill, level) in zip(*[
+        skill_list = [{"skill_name": skill.replace('.', ''), "skill_level": level} for (skill, level) in zip(*[
             iter(tech_stack)]*2)]
 
         company_descr = company_descr.split(offer['author'])[1].split('\n')
