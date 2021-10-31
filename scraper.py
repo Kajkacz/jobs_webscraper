@@ -88,7 +88,7 @@ class Scraper():
 
         if city in self.cities_translations:
             city = self.cities_translations[city]
-        driver.get(offer['id'])
+        resp = driver.get(offer['id'])
         page_text = driver.find_element_by_id('root')
 
         doc["address"] = address

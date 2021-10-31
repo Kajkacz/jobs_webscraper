@@ -17,12 +17,14 @@ options.headless = True
 options.add_argument(
     "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
 options.add_argument("--window-size=1920,1200")
+options.add_argument('log-level=3')
 driver = webdriver.Chrome(
     options=options, executable_path=config['selenium']['webdriver_path'])
 
 # Connect to mongodb client
-myclient = pymongo.MongoClient(
-    f"mongodb+srv://{config['mongodb']['username']}:{config['mongodb']['password']}@{config['mongodb']['url']}/{config['mongodb']['db_name']}?retryWrites=true&w=majority")  #
+mongo_url=f"mongodb+srv://{config['mongodb']['username']}:{config['mongodb']['password']}@{config['mongodb']['url']}/{config['mongodb']['db_name']}?retryWrites=true&w=majority"
+print(f"Connecting to mongo at {mongo_url}")
+myclient = pymongo.MongoClient(mongo_url)
 mydb = myclient[config['mongodb']['db_name']]
 offers_collection = mydb[config['mongodb']['collection_name']]
 
