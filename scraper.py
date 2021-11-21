@@ -19,6 +19,13 @@ class Scraper():
         self.cities = []
         self.currencies = []
         self.cities_translations = {'Warsaw': 'Warszawa'}
+        self.failed_sites = []
+
+    def __del__(self):
+        if self.failed_sites:
+            print("Failed sites : ")
+            for s in self.failed_sites:
+                print(s)
 
     def get_salary_details(self, salary, salaries_raw):
         """Get's the salary details from the salary chunk
@@ -150,7 +157,11 @@ class Scraper():
             Dict: Updated data from description
         """
         description = offer["full_description"]
-        descr_intro, descr_rest = description.split("More filters\n")
+        try:
+            descr_intro, descr_rest = description.split("More filters\n")
+        except ValueError as e:
+            self.failed_sites.append(offer)
+            return ""
         company_descr = descr_rest.split("Tech stack")[0]
         descr_rest = "Tech stack".join(descr_rest.split("Tech stack")[1:])
         tech_stack_description = descr_rest.split("Description")[0]

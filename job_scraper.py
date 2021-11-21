@@ -20,9 +20,20 @@ options.add_argument("--window-size=1920,1200")
 options.add_argument('log-level=3')
 driver = webdriver.Chrome(
     options=options, executable_path=config['selenium']['webdriver_path'])
-
+local_db = False
 # Connect to mongodb client
-mongo_url=f"mongodb+srv://{config['mongodb']['username']}:{config['mongodb']['password']}@{config['mongodb']['url']}/{config['mongodb']['db_name']}?retryWrites=true&w=majority"
+if local_db:
+    username = config['mongodb']['local_username']
+    password = config['mongodb']['local_password']
+    url = config['mongodb']['local_url']
+    prefix = "mongodb"
+else:
+    username = config['mongodb']['username']
+    password = config['mongodb']['password']
+    url = config['mongodb']['url']
+    prefix = "mongodb+srv"
+
+mongo_url=f"{prefix}://{username}:{password}@{url}/{config['mongodb']['db_name']}?retryWrites=true&w=majority"
 print(f"Connecting to mongo at {mongo_url}")
 myclient = pymongo.MongoClient(mongo_url)
 mydb = myclient[config['mongodb']['db_name']]

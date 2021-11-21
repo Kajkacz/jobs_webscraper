@@ -3,3 +3,5 @@ pyenv
 config.ini
 chromedriver.exe
 __pycache__
+offers.json
+mongodrdl_command

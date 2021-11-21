@@ -1,0 +1,17 @@
+PROJEKT ODDAJEMY NA OSTATNICH ZAJÊCIACH.
+
+Obowi¹zkowe projektu:
+1. Pytania biznesowe - oko³o 5 - 3pkt
+2. Schemat gwiazdy - 7 pkt
+3. ETL pocz¹tkowy - uruchomiony na ¿ywo - 10 pkt (Integration Services)
+4. Kostka, w której maj¹ byæ - 10 pkt (Analysis Services)
+   - hierarchie
+   - sensowne sortowania
+   - przynajmniej 1 kalkulacja
+   - przynajmniej 1 zbiór elementów
+   - mile widziane KPI
+5. Raporty pokazuj¹ce dane z wymagañ biznesowych zdefiniowanych w punkcie 1. W raportach maj¹ byæ elementy graficzne (wykresy). (Reporting Services, Power BI lub Excel) - 10pkt
+6. Ciekawy temat, sensownoœæ wykonania, jakoœæ prezentacji - 5 pkt
+
+W razie wyboru innej œcie¿ki narzedziowej konieczne jest zastosowanie narzedzia do ETL, narzêdzia do tworzenia kostek oraz narzêdzia do raportów.
+

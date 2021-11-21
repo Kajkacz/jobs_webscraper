@@ -1,0 +1,151 @@
+schema:
+- db: dev_job_scrapper
+  tables:
+  - table: offers
+    collection: offers
+    pipeline: []
+    columns:
+    - Name: _id
+      MongoType: bson.ObjectId
+      SqlName: _id
+      SqlType: objectid
+    - Name: 8 500 - 12 500 PLN gross/month - Permanent
+      MongoType: string
+      SqlName: 8 500 - 12 500 PLN gross/month - Permanent
+      SqlType: varchar
+    - Name: address
+      MongoType: string
+      SqlName: address
+      SqlType: varchar
+    - Name: author
+      MongoType: string
+      SqlName: author
+      SqlType: varchar
+    - Name: Brand Story
+      MongoType: string
+      SqlName: Brand Story
+      SqlType: varchar
+    - Name: city
+      MongoType: string
+      SqlName: city
+      SqlType: varchar
+    - Name: Company name
+      MongoType: string
+      SqlName: Company name
+      SqlType: varchar
+    - Name: Company size
+      MongoType: string
+      SqlName: Company size
+      SqlType: varchar
+    - Name: date
+      MongoType: string
+      SqlName: date
+      SqlType: varchar
+    - Name: description
+      MongoType: string
+      SqlName: description
+      SqlType: varchar
+    - Name: EXP lvl
+      MongoType: string
+      SqlName: EXP lvl
+      SqlType: varchar
+    - Name: full_description
+      MongoType: string
+      SqlName: full_description
+      SqlType: varchar
+    - Name: id
+      MongoType: string
+      SqlName: id
+      SqlType: varchar
+    - Name: link
+      MongoType: string
+      SqlName: link
+      SqlType: varchar
+    - Name: position
+      MongoType: string
+      SqlName: position
+      SqlType: varchar
+    - Name: raw_salary
+      MongoType: string
+      SqlName: raw_salary
+      SqlType: varchar
+    - Name: title
+      MongoType: string
+      SqlName: title
+      SqlType: varchar
+    - Name: "ul \u0141ucka 2/4/6 lok u4, WarszawaFully Remote"
+      MongoType: string
+      SqlName: "ul \u0141ucka 2/4/6 lok u4, WarszawaFully Remote"
+      SqlType: varchar
+  - table: offers_salary
+    collection: offers
+    pipeline:
+    - $unwind:
+        includeArrayIndex: salary_idx
+        path: $salary
+        preserveNullAndEmptyArrays: false
+    columns:
+    - Name: _id
+      MongoType: bson.ObjectId
+      SqlName: _id
+      SqlType: objectid
+    - Name: salary.average
+      MongoType: string
+      SqlName: salary.average
+      SqlType: varchar
+    - Name: salary.average_pln
+      MongoType: string
+      SqlName: salary.average_pln
+      SqlType: varchar
+    - Name: salary.currency
+      MongoType: string
+      SqlName: salary.currency
+      SqlType: varchar
+    - Name: salary.employment_type
+      MongoType: string
+      SqlName: salary.employment_type
+      SqlType: varchar
+    - Name: salary.lower_range
+      MongoType: string
+      SqlName: salary.lower_range
+      SqlType: varchar
+    - Name: salary.lower_range_pln
+      MongoType: string
+      SqlName: salary.lower_range_pln
+      SqlType: varchar
+    - Name: salary.upper_range
+      MongoType: string
+      SqlName: salary.upper_range
+      SqlType: varchar
+    - Name: salary.upper_range_pln
+      MongoType: string
+      SqlName: salary.upper_range_pln
+      SqlType: varchar
+    - Name: salary_idx
+      MongoType: int
+      SqlName: salary_idx
+      SqlType: int
+  - table: offers_skills
+    collection: offers
+    pipeline:
+    - $unwind:
+        includeArrayIndex: skills_idx
+        path: $skills
+        preserveNullAndEmptyArrays: false
+    columns:
+    - Name: _id
+      MongoType: bson.ObjectId
+      SqlName: _id
+      SqlType: objectid
+    - Name: skills.skill_level
+      MongoType: string
+      SqlName: skills.skill_level
+      SqlType: varchar
+    - Name: skills.skill_name
+      MongoType: string
+      SqlName: skills.skill_name
+      SqlType: varchar
+    - Name: skills_idx
+      MongoType: int
+      SqlName: skills_idx
+      SqlType: int
