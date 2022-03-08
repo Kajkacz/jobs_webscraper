@@ -9,19 +9,17 @@ from boto.s3.connection import S3Connection
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-
 # Set up selenium webdriver
 options = Options()
 options.headless = True
-options.add_argument(
-    "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
-options.add_argument("--window-size=1920,1200")
 options.add_argument('log-level=3')
-local_db = False
-
 
 # Get config definition
 if os.path.exists('config.ini'):
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
+    options.add_argument("--window-size=1920,1200")
+    local_db = False
     config = configparser.ConfigParser()
     config.read('config.ini')
     driver = webdriver.Chrome(
@@ -41,6 +39,10 @@ if os.path.exists('config.ini'):
     coll_name = config['mongodb']['collection_name']
     rates_key = config['rates']['api_key']
 else:
+    options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     prefix = "mongodb+srv"
     username =  os.environ['mongo_url']
     password =  os.environ['mongo_username']
