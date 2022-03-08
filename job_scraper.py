@@ -44,9 +44,9 @@ else:
     options.add_argument("--no-sandbox")
     driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=options)
     prefix = "mongodb+srv"
-    username =  os.environ['mongo_url']
-    password =  os.environ['mongo_username']
-    url =       os.environ['mongo_password']
+    url=  os.environ['mongo_url']
+    username  =  os.environ['mongo_username']
+    password =       os.environ['mongo_password']
     db_name =   os.environ['mongo_db_name']
     coll_name = os.environ['mongo_coll_name']
     rates_key = os.environ['rates_key']
