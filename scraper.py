@@ -108,7 +108,7 @@ class Scraper():
             description_details = self.parse_single_description(offer)
             doc.update(description_details)
         except IndexError as e:
-            print(f'Error parsing description : {e}')
+            print(f'Error parsing description for offer {offer["id"]} : {e}')
         if city not in self.cities:
             self.cities.append(city)
         if old_db_corresponding_record:
@@ -165,7 +165,7 @@ class Scraper():
         company_descr = descr_rest.split("Tech stack")[0]
         descr_rest = "Tech stack".join(descr_rest.split("Tech stack")[1:])
         tech_stack_description = descr_rest.split("Description")[0]
-        descr_rest = "Description".join(descr_rest.split("Description")[1:])
+        descr_rest = "Description".join(descr_rest.split("`Description`")[1:])
         tech_stack = list(filter(None, tech_stack_description.split('\n')))
         descr_text = descr_rest.split("Apply")
         descr_garbage = descr_text[-1]
