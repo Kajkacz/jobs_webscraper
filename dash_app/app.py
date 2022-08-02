@@ -4,6 +4,9 @@ from dash import dcc,html
 from dash.dependencies import Input, Output
 import plotly.express as px
 from plotly.subplots import make_subplots
+import plotly
+import plotly.graph_objects as go
+
 import pymongo
 import configparser
 
@@ -55,7 +58,9 @@ city_salary_offers_df = pd.json_normalize(list(city_salary_offers))
 print(city_salary_offers_df.columns)
 fig = make_subplots(rows=1, cols=2)
 
-fig.add_trace(px.bar(city_salary_offers_df, x='_id.city', y='salary_average')
+fig.add_trace(
+    go.Bar(x=city_salary_offers_df['_id.city'], y=city_salary_offers_df['salary_average']),
+    row=1,col=1
 )
 
 tech_size_threshold = 50
@@ -86,7 +91,11 @@ tech_pipeline = [
 tech_salary_offers = offers_collection.aggregate(tech_pipeline)
 tech_salary_offers_df = pd.json_normalize(list(tech_salary_offers))
 
-# fig = px.bar(tech_salary_offers_df, x='_id.tech', y='salary_average')
+fig.add_trace(
+    go.Bar(x=tech_salary_offers_df['_id.tech'], y=tech_salary_offers_df['salary_average']),
+    row=1,col=2
+)
+fig.update_layout(height=1000, width=1200, title_text="Market analysis")
 fig.show()
 
 # other fields:
