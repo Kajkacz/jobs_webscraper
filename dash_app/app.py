@@ -31,8 +31,6 @@ offers_collection = mydb[coll_name]
 city_size_threshold = 20
 
 cities_pipeline = [
-    # {'$addFields': { 'date_formatted': { '$toDate': "$date" } } }, 
-    # {'$match':{"date_formatted": {'$gte': 'ISODate("2021-06-01T00:00:00.0Z")'}}},
     {'$unwind':'$salary'},
     {'$match':{"salary.average_pln":{"$ne" : "undisclosed"}}},
     {'$match':{"salary.currency":"PLN"}},
@@ -55,25 +53,32 @@ cities_pipeline = [
 city_salary_offers = offers_collection.aggregate(cities_pipeline)
 city_salary_offers_df = pd.json_normalize(list(city_salary_offers))
 
-print(city_salary_offers_df.columns)
-fig = make_subplots(rows=1, cols=2)
+fig = make_subplots(
+    rows=2,
+    cols=2,
+    subplot_titles=("Salary by City", "Salary by Tech", "Salary by Tech Level"), 
+    specs=[
+        [
+            {"type": "bar"},{"type": "bar"}
+        ],[ {"type": "scene","colspan": 2},None]
+    ])
+
+  
 
 fig.add_trace(
-    go.Bar(x=city_salary_offers_df['_id.city'], y=city_salary_offers_df['salary_average']),
+    go.Bar(x=city_salary_offers_df['_id.city'], y=city_salary_offers_df['salary_average'],name="Salary by City",marker=dict(color=city_salary_offers_df['salary_average'],coloraxis="coloraxis")),
     row=1,col=1
 )
 
 tech_size_threshold = 50
 
 tech_pipeline = [
-    # {'$addFields': { 'date_formatted': { '$toDate': "$date" } } }, 
-    # {'$match':{"date_formatted": {'$gte': 'ISODate("2021-06-01T00:00:00.0Z")'}}},
     {'$unwind':'$salary'},
     {'$match':{"salary.average_pln":{"$ne" : "undisclosed"}}},
     {'$match':{"salary.currency":"PLN"}},
     {'$unwind':'$skills'},
     {'$project':{
-        'skills.skill_name':1,#TODO add level
+        'skills.skill_name':1,
         'salary.average_pln':1,
         }
     },
@@ -88,29 +93,101 @@ tech_pipeline = [
     {'$sort':{"salary_average":1}},
 ]
 
+tech_size_threshold_w_level = 100
+
+tech_pipeline_w_level = [
+    {'$unwind':'$salary'},
+    {'$match':{"salary.average_pln":{"$ne" : "undisclosed"}}},
+    {'$match':{"salary.currency":"PLN"}},
+    {'$unwind':'$skills'},
+    {'$project':{
+        'skills.skill_name':1,
+        'skills.skill_level':1,
+        'salary.average_pln':1,
+        }
+    },
+    {'$group':
+        {
+        '_id': { 'tech' : "$skills.skill_name",'level' : "$skills.skill_level" },
+        'salary_average': { '$avg' : "$salary.average_pln" },
+        'tech_count': { '$count' : {} }
+        }
+    },
+    {'$match':{"tech_count":{"$gt":tech_size_threshold_w_level}}},
+    {'$sort':{"salary_average":1}},
+]
+
 tech_salary_offers = offers_collection.aggregate(tech_pipeline)
 tech_salary_offers_df = pd.json_normalize(list(tech_salary_offers))
 
 fig.add_trace(
-    go.Bar(x=tech_salary_offers_df['_id.tech'], y=tech_salary_offers_df['salary_average']),
+    go.Bar(
+        x=tech_salary_offers_df['_id.tech'], 
+        y=tech_salary_offers_df['salary_average'], 
+        name="Salary by Tech",
+        marker=dict(
+            color=tech_salary_offers_df['salary_average'],
+            coloraxis="coloraxis"
+            )
+        ),
     row=1,col=2
 )
-fig.update_layout(height=1000, width=1200, title_text="Market analysis")
-fig.show()
 
-# other fields:
-# '_id':1,
-# 'id':1,
-# 'title':1,
-# 'position':1,
-# 'author':1,
-# 'link':1,
-# 'address':1,
-# 'salary.average_pln':1,
-# 'raw_salary':1,
-# 'full_description':1,
-# 'Company name':1,
-# 'Company size':1,
-# 'EXP lvl':1,
-# 'description':1,
-# 'skills':1
+tech_salary_offers_w_level = offers_collection.aggregate(tech_pipeline_w_level)
+tech_salary_offers_w_level_df = pd.json_normalize(list(tech_salary_offers_w_level))
+#  grab x/y labels, create storage for z data
+techs = tech_salary_offers_w_level_df['_id.tech'].unique()
+levels = tech_salary_offers_w_level_df['_id.level'].unique()
+levels.sort()
+levels = [
+    # "nice to have",
+    "junior",
+    "regular",
+    "advanced",
+    "master"
+    ] #TODO Fix This
+z_data = []
+
+# extract z data using x,y coordinates within the dataframe
+for tech in techs:
+  row = []
+  for level in levels:
+    try:
+        val = tech_salary_offers_w_level_df[
+        (tech_salary_offers_w_level_df['_id.tech'] == tech) &
+        (tech_salary_offers_w_level_df['_id.level'] == level)]['salary_average'].values[0]
+    except IndexError:
+        val = 0
+    row.append(int(val))
+  z_data.append(row)
+
+for row in z_data:
+    for i,value in enumerate(row):
+        if value == 0:
+            if i == 0:
+                row[i] = min([v for v in row if v != 0] or 0)*0.9
+            else:
+                row[i] = row[i-1]*1.1
+
+plane = go.Surface(
+        x=levels, 
+        y=techs, 
+        z=z_data,
+        name="Salary by Tech Level")
+
+fig.add_trace(
+    plane,
+    row=2,col=1
+)
+
+# fig = go.Figure(plane)
+
+fig.update_layout(
+    height=1500, 
+    width=1800, 
+    title_text="Market analysis",
+    coloraxis=dict(colorscale='plasma'),
+    showlegend=False,
+    template="plotly_dark")
+
+fig.show()
