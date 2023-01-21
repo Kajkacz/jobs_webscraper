@@ -9,6 +9,8 @@ import plotly.graph_objects as go
 
 import pymongo
 import configparser
+import os
+import sys
 
 import pdmongo as pdm
 import pandas as pd
@@ -17,14 +19,31 @@ import pandas as pd
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-username = config['mongodb']['username']
-password = config['mongodb']['password']
-url = config['mongodb']['url']
-prefix = "mongodb+srv"
-db_name = config['mongodb']['db_name']
-coll_name = config['mongodb']['collection_name']
-rates_key = config['rates']['api_key']
-mongo_url=f"{prefix}://{username}:{password}@{url}/{db_name}?retryWrites=true&w=majority"
+suffix = "?retryWrites=true&w=majority"
+# Get config definition
+if os.path.exists('config.ini'):
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    if len(sys.argv) > 1:
+        local_db = sys.argv[1]
+    else:
+        local_db = config['mongodb']['local_db'] == 'True'
+    # Connect to mongodb client
+    if local_db:
+        username = config['mongodb']['local_username']
+        password = config['mongodb']['local_password']
+        url = config['mongodb']['local_url']
+        prefix = "mongodb"
+        suffix = "?authSource=admin&readPreference=primary&ssl=false&directConnection=true"
+    else:
+        username = config['mongodb']['username']
+        password = config['mongodb']['password']
+        url = config['mongodb']['url']
+        prefix = "mongodb+srv"
+    db_name = config['mongodb']['db_name']
+    coll_name = config['mongodb']['collection_name']
+    rates_key = config['rates']['api_key']
+mongo_url=f"{prefix}://{username}:{password}@{url}/{db_name}{suffix}"
 myclient = pymongo.MongoClient(mongo_url)
 mydb = myclient[db_name]
 offers_collection = mydb[coll_name]
@@ -165,7 +184,7 @@ for row in z_data:
     for i,value in enumerate(row):
         if value == 0:
             if i == 0:
-                row[i] = min([v for v in row if v != 0] or 0)*0.9
+                row[i] = min([v for v in row if v != 0])*0.9 if [v for v in row if v != 0] else 0
             else:
                 row[i] = row[i-1]*1.1
 
