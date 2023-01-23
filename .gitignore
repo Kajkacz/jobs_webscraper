@@ -5,3 +5,4 @@ chromedriver.exe
 __pycache__
 offers.json
 mongodrdl_command
+mongo_offers.json
