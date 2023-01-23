@@ -2,7 +2,6 @@ import pandas as pd
 import dash
 from dash import dcc,html
 from dash.dependencies import Input, Output
-import plotly.express as px
 from plotly.subplots import make_subplots
 import plotly
 import plotly.graph_objects as go
@@ -191,3 +190,30 @@ fig.update_layout(
     template="plotly_dark")
 
 fig.show()
+
+app = dash.Dash(__name__)
+server = app.server
+
+app.layout = html.Div([
+    html.Div([dcc.Dropdown(id='group-select', options=[{'label': i, 'value': i} for i in techs],
+                           value='TOR', style={'width': '140px'})]),
+    dcc.Graph('shot-dist-graph', config={'displayModeBar': False})])
+
+@app.callback(
+    Output('shot-dist-graph', 'figure'),
+    [Input('group-select', 'value')]
+)
+def update_graph(grpname):
+    return go.Bar(
+        x=tech_salary_offers_df['_id.tech'], 
+        y=tech_salary_offers_df['salary_average'], 
+        name="Salary by Tech",
+        marker=dict(
+            color=tech_salary_offers_df['salary_average'],
+            coloraxis="coloraxis"
+            )
+        )
+    # px.scatter(all_teams_df[all_teams_df.group == grpname], x='min_mid', y='player', size='shots_freq', color='pl_pps')
+
+if __name__ == '__main__':
+    app.run_server(debug=False)
