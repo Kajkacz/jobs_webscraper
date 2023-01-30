@@ -24,7 +24,7 @@ if os.path.exists('config.ini'):
     config = configparser.ConfigParser()
     config.read('config.ini')
     if len(sys.argv) > 1:
-        local_db = sys.argv[1]
+        local_db = sys.argv[1] == 'True'
     else:
         local_db = config['mongodb']['local_db'] == 'True'
     driver = webdriver.Chrome(

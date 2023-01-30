@@ -234,5 +234,70 @@ def update_graph(grpname):
         )
     # px.scatter(all_teams_df[all_teams_df.group == grpname], x='min_mid', y='player', size='shots_freq', color='pl_pps')
 
+
+# app.layout = ddk.App(
+#     [
+#         ...
+#         ddk.Card(
+#             [
+#                 ddk.CardHeader(title="Triggering Callbacks from Dash App & Host App"),
+#                 ConsumerContext(id="clicks", path=["myObject", "clicks"]),
+#                 ConsumerContext(id="data-one", path=["myObject", "data", "dataOne"]),
+#                 ConsumerContext(id="data-two", path=["myObject", "data", "dataTwo"]),
+#                 ...
+#             ],
+#             width=50,
+#         ),
+#         ddk.ControlCard(
+#             [
+#                 ddk.CardHeader(title="Triggering Host App Functions from Dash App"),
+#                 ConsumerFunction(
+#                     id="host-app-multiply", path=["myObject", "multiplyFunc"]
+#                 ),
+#                 ConsumerFunction(id="host-app-sum", path=["myObject", "sumFunc"]),
+#                 ddk.ControlItem(...),
+#                 ...
+#             ],
+#             width=50,
+#         ),
+#         ...
+#     ]
+# )
+
+
+# Access the nested objects via `path=["myObject"]`
+@app.callback(Output("display-full-object", "children"), Input("full-object", "value"))
+def display(value):
+    return json.dumps(value, indent=2)
+
+
+# Access nested values via `path=[...]`
+@app.callback(
+    Output("display-data_dataOne_y[1]", "children"), Input("data_dataOne_y[1]", "value"))
+def display(value):
+    return "data.dataOne.y[1]={}".format(value)
+
+
+# Trigger Callback from Host App Data & Dash App Buttons
+@app.callback(
+    Output("plot", "figure"),
+    Input("update", "n_clicks"), Input("clicks", "value"),
+    State("data-one", "value"), State("data-two", "value"),
+)
+def update_figure(clicks_dash, clicks_host, trace1, trace2):
+    ...
+    return go.Figure(...)
+
+
+# Trigger Host App functions by sending data into the `params` property
+@app.callback(
+    Output("host-app-sum", "params"),
+    Input("sum", "n_clicks"),
+    State("input-x", "value"), State("input-y", "value"),
+)
+def trigger_sum(_, x, y):
+    return [x, y]
+...
+
 if __name__ == '__main__':
     app.run_server(debug=False)
