@@ -13,6 +13,7 @@ import sys
 
 import pdmongo as pdm
 import pandas as pd
+import json 
 
 # Get config definition
 config = configparser.ConfigParser()
@@ -278,26 +279,26 @@ def display(value):
     return "data.dataOne.y[1]={}".format(value)
 
 
-# Trigger Callback from Host App Data & Dash App Buttons
-@app.callback(
-    Output("plot", "figure"),
-    Input("update", "n_clicks"), Input("clicks", "value"),
-    State("data-one", "value"), State("data-two", "value"),
-)
-def update_figure(clicks_dash, clicks_host, trace1, trace2):
-    ...
-    return go.Figure(...)
+# # Trigger Callback from Host App Data & Dash App Buttons
+# @app.callback(
+#     Output("plot", "figure"),
+#     Input("update", "n_clicks"), Input("clicks", "value"),
+#     State("data-one", "value"), State("data-two", "value"),
+# )
+# def update_figure(clicks_dash, clicks_host, trace1, trace2):
+#     ...
+#     return go.Figure(...)
 
 
-# Trigger Host App functions by sending data into the `params` property
-@app.callback(
-    Output("host-app-sum", "params"),
-    Input("sum", "n_clicks"),
-    State("input-x", "value"), State("input-y", "value"),
-)
-def trigger_sum(_, x, y):
-    return [x, y]
-...
+# # Trigger Host App functions by sending data into the `params` property
+# @app.callback(
+#     Output("host-app-sum", "params"),
+#     Input("sum", "n_clicks"),
+#     State("input-x", "value"), State("input-y", "value"),
+# )
+# def trigger_sum(_, x, y):
+#     return [x, y]
+# ...
 
 if __name__ == '__main__':
     app.run_server(debug=False)
