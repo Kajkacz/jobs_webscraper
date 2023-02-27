@@ -5,6 +5,8 @@
     "plotly.js": "^2.18.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-plotly.js": "^2.6.0"
+    "react-plotly.js": "^2.6.0",
+    "vue-slider-component": "^3.2.24",
+    "vuesax": "^3.12.2"
   }
 }
