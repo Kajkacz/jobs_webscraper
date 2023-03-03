@@ -18,27 +18,6 @@ import pandas as pd
 
 city_size_threshold = 20
 tech_size_threshold = 50
-cities_pipeline = [
-    {"$unwind": "$salary"},
-    {"$match": {"salary.average_pln": {"$ne": "undisclosed"}}},
-    {"$match": {"salary.currency": "PLN"}},
-    {
-        "$project": {
-            "date": 1,
-            "city": 1,
-            "salary.average_pln": 1,
-        }
-    },
-    {
-        "$group": {
-            "_id": {"city": "$city"},
-            "salary_average": {"$avg": "$salary.average_pln"},
-            "city_count": {"$count": {}},
-        }
-    },
-    {"$match": {"city_count": {"$gt": city_size_threshold}}},
-    {"$sort": {"salary_average": 1}},
-]
 tech_pipeline = [
     {"$unwind": "$salary"},
     {"$match": {"salary.average_pln": {"$ne": "undisclosed"}}},
@@ -79,53 +58,117 @@ def get_offers(request):
     db = client["dev_job_scrapper"]
     collection = db["offers"]
     threshold = 20
-    upper_threshold = int(
-        request.GET.get("upper_threshold")
-    )  # Access the city parameter
-    lower_threshold = int(
-        request.GET.get("lower_threshold")
-    )  # Access the city parameter
-    tech_pipeline = [
-        {"$unwind": "$salary"},
-        {"$match": {"salary.average_pln": {"$ne": "undisclosed"}}},
-        {"$match": {"salary.currency": "PLN"}},
-        {"$unwind": "$skills"},
-        {
-            "$project": {
-                "skills.skill_name": 1,
-                "salary.average_pln": 1,
-            }
-        },
-        {
-            "$group": {
-                "_id": {"tech": "$skills.skill_name"},
-                "salary_average": {"$avg": "$salary.average_pln"},
-                "tech_count": {"$count": {}},
-            }
-        },
-        {
-            "$match": {
-                "$and": [
-                    {"tech_count": {"$gt": upper_threshold}},
-                    {"tech_count": {"$lt": lower_threshold}},
-                ]
-            }
-        },
-        {"$sort": {"salary_average": 1}},
-    ]
-    offers = collection.aggregate(tech_pipeline)
-    offers_list = list(offers)
-    tech_salary_offers_df = pd.json_normalize(offers_list)
+    mode = request.GET.get("mode")
+    upper_threshold_count = int(
+        request.GET.get("upper_threshold_count")
+    )  
+    lower_threshold_count = int(
+        request.GET.get("lower_threshold_count")
+    )  
+    upper_threshold_cash = int(
+        request.GET.get("upper_threshold_cash")
+    )  
+    lower_threshold_cash = int(
+        request.GET.get("lower_threshold_cash")
+    )  
 
-    x = tech_salary_offers_df["_id.tech"].tolist()
-    y = tech_salary_offers_df["salary_average"].tolist()
-    name = ("Salary by Tech",)
-    # marker=dict(
-    #     color=tech_salary_offers_df['salary_average'],
-    #     coloraxis="coloraxis"
-    #     )
-    return JsonResponse(
-        {"x": x, "y": y, "offers_list": offers_list},
-        content_type="application/json",
-        safe=False,
-    )
+    if mode == 'tech':
+        tech_pipeline = [
+            {"$unwind": "$salary"},
+            {"$match": {
+                "$and": [
+                    {"salary.average_pln": {"$ne": "undisclosed"}},
+                    {"salary.upper_range": {"$ne": "undisclosed"}},
+                    {"salary.lower_range": {"$ne": "undisclosed"}},
+                    {"salary.currency": "PLN"}
+                ]
+            }},
+            {"$unwind": "$skills"},
+            {
+                "$project": {
+                    "skills.skill_name": 1,
+                    "salary.average_pln": 1,
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"tech": "$skills.skill_name"},
+                    "salary_average": {"$avg": "$salary.average_pln"},
+                    "tech_count": {"$count": {}},
+                }
+            },
+            {
+                "$match": {
+                    "$and": [
+                        {"tech_count": {"$lt": upper_threshold_count}},
+                        {"tech_count": {"$gt": lower_threshold_count}},
+                        {"salary_average": {"$lt": upper_threshold_cash}},
+                        {"salary_average": {"$gt": lower_threshold_cash}},
+                        {"salary_average": {"$ne": "nan"}},
+                    ]
+                }
+            },
+            {"$sort": {"salary_average": 1}},
+        ]
+        offers = collection.aggregate(tech_pipeline)
+        offers_list = list(offers)
+        tech_salary_offers_df = pd.json_normalize(offers_list)
+        try:
+            x = tech_salary_offers_df["_id.tech"].tolist()
+            y = tech_salary_offers_df["salary_average"].tolist()
+        except:
+            x = []
+            y = []
+        return JsonResponse(
+            {"x": x, "y": y, "offers_list": offers_list},
+            content_type="application/json")
+    elif mode =='cities':
+        cities_pipeline = [
+            {"$unwind": "$salary"},
+            {"$match": {
+                "$and": [
+                    {"salary.average_pln": {"$ne": "undisclosed"}},
+                    {"salary.upper_range": {"$ne": "undisclosed"}},
+                    {"salary.lower_range": {"$ne": "undisclosed"}},
+                    {"salary.currency": "PLN"}
+                ]
+            }},
+            {
+                "$project": {
+                    "date": 1,
+                    "city": 1,
+                    "salary.average_pln": 1,
+                }
+            },
+            {
+                "$group": {
+                    "_id": {"city": "$city"},
+                    "salary_average": {"$avg": "$salary.average_pln"},
+                    "city_count": {"$count": {}},
+                }
+            },
+            {
+                "$match": {
+                    "$and": [
+                        {"city_count": {"$lt": upper_threshold_count}},
+                        {"city_count": {"$gt": lower_threshold_count}},
+                        {"salary_average": {"$lt": upper_threshold_cash}},
+                        {"salary_average": {"$gt": lower_threshold_cash}},
+                        {"salary_average": {"$ne": "nan"}},
+                    ]
+                }
+            },
+            {"$sort": {"salary_average": 1}},
+        ]
+        offers = collection.aggregate(cities_pipeline)
+        offers_list = list(offers)
+        tech_salary_offers_df = pd.json_normalize(offers_list)
+        try:
+            x = tech_salary_offers_df["_id.city"].tolist()
+            y = tech_salary_offers_df["salary_average"].tolist()
+        except:
+            x = []
+            y = []
+        return JsonResponse(
+            {"x": x, "y": y, "offers_list": offers_list},
+            content_type="application/json")
