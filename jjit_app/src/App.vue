@@ -22,22 +22,32 @@
     <div v-else-if="selectedItem === 'General Info'">
       This webpage info, TODO
     </div>
+    <div v-else-if="selectedItem === 'Random Offers'">
+      <RandomOffers />
+    </div>
+    <div v-else-if="selectedItem === 'Offers By Tech'">
+      <OffersByTechnology />
+    </div>
   </div>
 </template>
 
 <script>
 import EarningsPlot from './components/EarningsPlot.vue'
 import CitiesPlot from './components/CitiesPlot.vue'
+import RandomOffers from './components/RandomOffers.vue'
+import OffersByTechnology from './components/OffersByTechnology.vue'
 
 export default {
   name: 'App',
   components: {
     EarningsPlot,
-    CitiesPlot
+    CitiesPlot,
+    RandomOffers,
+    OffersByTechnology
   },
   data() {
     return {
-      items: ['Earnings Plot', 'Cities Plot', 'General Info'],
+      items: ['Earnings Plot', 'Cities Plot', 'General Info', 'Random Offers', 'Offers By Tech'],
       selectedItem: 'Earnings Plot',
       menuOpen: false
     }

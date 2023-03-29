@@ -59,18 +59,26 @@ def get_offers(request):
     collection = db["offers"]
     threshold = 20
     mode = request.GET.get("mode")
-    upper_threshold_count = int(
-        request.GET.get("upper_threshold_count")
-    )  
-    lower_threshold_count = int(
-        request.GET.get("lower_threshold_count")
-    )  
-    upper_threshold_cash = int(
-        request.GET.get("upper_threshold_cash")
-    )  
-    lower_threshold_cash = int(
-        request.GET.get("lower_threshold_cash")
-    )  
+    if "upper_threshold_count" in request.GET:
+        upper_threshold_count = int(
+            request.GET.get("upper_threshold_count")
+        )  
+    if "lower_threshold_count" in request.GET:
+        lower_threshold_count = int(
+            request.GET.get("lower_threshold_count")
+        )  
+    if "upper_threshold_cash" in request.GET:
+        upper_threshold_cash = int(
+            request.GET.get("upper_threshold_cash")
+        )  
+    if "lower_threshold_cash" in request.GET:
+        lower_threshold_cash = int(
+            request.GET.get("lower_threshold_cash")
+        )  
+    if "count" in request.GET:
+        lower_threshold_cash = int(
+            request.GET.get("count")
+        )  
 
     if mode == 'tech':
         tech_pipeline = [
@@ -119,8 +127,55 @@ def get_offers(request):
         except:
             x = []
             y = []
+        try:
+            techs = [offer['_id']['tech'] for offer in offers_list]
+        except:
+            techs = []
         return JsonResponse(
-            {"x": x, "y": y, "offers_list": offers_list},
+            {"x": x, "y": y, "offers_list": offers_list, "techs":techs},
+            content_type="application/json")
+    if mode == 'offers_by_tech':
+        
+        if "technologies" in request.GET:
+            technologies = request.GET.get("technologies").split(',')
+
+        tech_pipeline = [
+            {
+                '$match': {
+                    'skills.skill_name': {'$in': technologies}
+                    }
+            }
+        ]
+        offers = collection.aggregate(tech_pipeline)
+        offers_list = list(offers)
+        tech_salary_offers_df = pd.json_normalize(offers_list)
+        try:
+            x = tech_salary_offers_df["_id.tech"].tolist()
+            y = tech_salary_offers_df["salary_average"].tolist()
+        except:
+            x = []
+            y = []
+        try:
+            techs = [offer['_id']['tech'] for offer in offers_list]
+        except:
+            techs = []
+        return JsonResponse(
+            {"x": x, "y": y, "offers_list": offers_list[:20], "techs":techs},
+            content_type="application/json")
+    elif mode =='rand':
+        cities_pipeline = [
+            { "$sample": { "size": 10 } },
+            {
+                "$project": {
+                    "_id": 0,
+
+                }
+            },
+        ]
+        offers = collection.aggregate(cities_pipeline)
+        offers_list = list(offers)
+        return JsonResponse(
+            { "offers_list": offers_list},
             content_type="application/json")
     elif mode =='cities':
         cities_pipeline = [
